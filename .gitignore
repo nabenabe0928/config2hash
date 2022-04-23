@@ -2,3 +2,7 @@
 **/.mypy_cache
 **/.pytest_cache
 .coverage
+
+dist/
+config2hash.egg-info/
+build/
