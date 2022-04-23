@@ -1,4 +1,13 @@
-from typing import Any, Dict, List
+import itertools
+from typing import Any, Dict, List, Set
+
+import numpy as np
+
+
+def _validate_search_space(search_space: Dict[str, List[Any]]) -> None:
+    for hp_name, choices in search_space.items():
+        if len(set(choices)) != len(choices):
+            raise ValueError("No duplications are allowed for search space, but " f"got {choices} in {hp_name}")
 
 
 class HashGenerator:
@@ -27,6 +36,7 @@ class HashGenerator:
             n_max_choices (int):
                 The maximum number of choices in search space.
         """
+        _validate_search_space(search_space)
         n_choices = [len(choices) for choices in search_space.values()]
         self._n_max_choices = max(n_choices)
         self._hp_to_index = {
@@ -34,7 +44,32 @@ class HashGenerator:
         }
         self._search_space = search_space
         dim = len(search_space)
-        self._base_list = [self._n_max_choices**d for d in range(dim)]
+        self._base_list = np.array([self._n_max_choices**d for d in range(dim)])
+        self._hash_set: Set[int] = set()
+        self._n_call_hash_set = 0
+
+    def _generate_hash_set(self) -> None:
+        index_list = [list(range(len(choices))) for choices in self._search_space.values()]
+        hash_list = []
+        for indices in itertools.product(*index_list):
+            hash_val = np.asarray(indices) @ self._base_list
+            hash_list.append(hash_val)
+
+        self._hash_set = set(hash_list)
+
+    @property
+    def hash_set(self) -> Set[int]:
+        self._n_call_hash_set += 1
+        if self._n_call_hash_set >= 50:
+            raise RuntimeError(
+                "hash_set is copied every time you call. "
+                "Please copy the attribute and avoid calling it from this instance."
+            )
+
+        if len(self._hash_set) == 0:
+            self._generate_hash_set()
+
+        return self._hash_set.copy()
 
     def config2hash(self, config: Dict[str, Any]) -> int:
         """

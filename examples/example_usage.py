@@ -1,20 +1,3 @@
-# A utility to convert configuration to a unique hash integer value
-
-[![Build Status](https://github.com/nabenabe0928/config2hash/workflows/Functionality%20test/badge.svg?branch=main)](https://github.com/nabenabe0928/config2hash)
-[![codecov](https://codecov.io/gh/nabenabe0928/config2hash/branch/main/graph/badge.svg?token=KMILMJCYZX)](https://codecov.io/gh/nabenabe0928/config2hash)
-
-
-## Setup
-
-```
-pip install config2hash
-```
-
-## Example
-
-You can run the following code by `python -m examples.example_usage`.
-
-```
 from config2hash import HashGenerator
 
 import numpy as np
@@ -37,5 +20,3 @@ if __name__ == "__main__":
             config[hp_name] = choices[idx]
 
         print(hg.config2hash(config), config)
-
-```
